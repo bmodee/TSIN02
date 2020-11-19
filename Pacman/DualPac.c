@@ -416,9 +416,14 @@ void Key(unsigned char key,
 			exit(0);
 	}
 	
+
+	
+	//================================= Local Player ========================================================
+
 	// Test whether the new direction should be applied immediately or later
 	// LOCAL PLAYER. But what should you tell the other computer about this?
 	// SOME NETWORK CODE NEEDED HERE
+
 	if (d1 > -1)
 	{
 		if (d1 == pacman1->direction) return;
@@ -433,8 +438,13 @@ void Key(unsigned char key,
 		else
 			pacman1->nextDirection = d1;
 	}
+
+
+	//================================= Remote Player ========================================================
+
 	// Test whether the new direction should be applied immediately or later
 	// REPLACE THIS! This should be controlled from the remote player!
+
 	if (d2 > -1)
 	{
 		if (d2 == pacman2->direction) return;
@@ -451,10 +461,61 @@ void Key(unsigned char key,
 	}
 }
 
+
 void InitNetwork()
 {
 // YOUR CODE HERE
 // Establish connection with the other computer
+
+// ========== Setup UDP ================
+/* Theory:
+In UDP, the client does not form a connection with the server like in TCP and instead just sends a datagram. 
+Similarly, the server need not accept a connection and just waits for datagrams to arrive. 
+Datagrams upon arrival contain the address of sender which the server uses to send data to the correct client. */
+
+struct sockaddr_in si_me, si_other;
+	
+
+    // 1. Create UDP socket.
+	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
+        perror("Can't create socket :(");
+        exit(-1);
+    }
+
+		// 1.1 Configure socket
+		memset(&server, 0, sizeof server);
+		server.sin_family = AF_INET; // Use IPv4
+		server.sin_addr.s_addr = htonl(INADDR_ANY); // My IP
+		server.sin_port = htons(atoi(argv[1])); // Server Port
+
+
+    // 2. Bind the socket to server address.
+	if ((bind(sockfd, (struct sockaddr *) &server, sizeof(server))) == -1) {
+        close(sockfd);
+        perror("Can't bind");
+    }
+
+    // 3. Wait until datagram packet arrives from client.
+	printf("listener: waiting to recvfrom...\n");
+    if (listen(sockfd, 5) == -1) {
+        perror("Can't listen for connections");
+        exit(-1);
+    }
+
+    // 4. Process the datagram packet and send a reply to client.
+    // 5. Go back to Step 3.
+
+
+// ========== Setup TCP ================
+
+
+// 	  ??????
+// 1. using create(), Create TCP socket.
+// 2. using bind(), Bind the socket to server address.
+// 3. using listen(), put the server socket in a passive mode, where it waits for the client to approach the server to make a connection
+// 4. using accept(), At this point, connection is established between client and server, and they are ready to transfer data.
+// 5. Go back to Step 3. 
+
 }
 
 int main(int argc, char **argv)

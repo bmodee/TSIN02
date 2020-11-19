@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+    <generated />
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="24c24e57-f29c-4167-a9ac-24838d91760c" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/Pacman/DualPac" beforeDir="false" afterPath="$PROJECT_DIR$/Pacman/DualPac" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1kVU7VqTNAOqNYuiSf1FYotjI8J" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="cf.first.check.clang-format" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="24c24e57-f29c-4167-a9ac-24838d91760c" name="Default Changelist" comment="" />
+      <created>1605785084550</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1605785084550</updated>
+      <workItem from="1605785085639" duration="61000" />
+      <workItem from="1605789319723" duration="2085000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="1075" y="689" width="400" height="284" key="#Scopes" timestamp="1605785098408">
+      <screen x="0" y="155" width="2560" height="1345" />
+    </state>
+    <state x="1075" y="689" width="400" height="284" key="#Scopes/0.155.2560.1345/2560.0.1080.1920@0.155.2560.1345" timestamp="1605785098408" />
+    <state x="738" y="485" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1605790683919">
+      <screen x="0" y="155" width="2560" height="1345" />
+    </state>
+    <state x="738" y="485" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.155.2560.1345/2560.0.1080.1920@0.155.2560.1345" timestamp="1605790683919" />
+    <state x="1063" y="585" width="424" height="491" key="FileChooserDialogImpl" timestamp="1605785137293">
+      <screen x="0" y="155" width="2560" height="1345" />
+    </state>
+    <state x="1063" y="585" width="424" height="491" key="FileChooserDialogImpl/0.155.2560.1345/2560.0.1080.1920@0.155.2560.1345" timestamp="1605785137293" />
+    <state x="769" y="462" width="1022" height="737" key="SettingsEditor" timestamp="1605791400564">
+      <screen x="0" y="155" width="2560" height="1345" />
+    </state>
+    <state x="769" y="462" width="1022" height="737" key="SettingsEditor/0.155.2560.1345/2560.0.1080.1920@0.155.2560.1345" timestamp="1605791400564" />
+  </component>
+</project>
