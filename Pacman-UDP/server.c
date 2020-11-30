@@ -1,6 +1,6 @@
 // Sample UDP server
 // Compile with
-// gcc udp-server.c -o udp-server
+// gcc server.c -o server
 
 #include <sys/socket.h>
 #include <netinet/in.h>
