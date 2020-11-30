@@ -473,34 +473,20 @@ In UDP, the client does not form a connection with the server like in TCP and in
 Similarly, the server need not accept a connection and just waits for datagrams to arrive. 
 Datagrams upon arrival contain the address of sender which the server uses to send data to the correct client. */
 
-struct sockaddr_in si_me, si_other;
+
 	
 
     // 1. Create UDP socket.
-	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
-        perror("Can't create socket :(");
-        exit(-1);
-    }
+
 
 		// 1.1 Configure socket
-		memset(&server, 0, sizeof server);
-		server.sin_family = AF_INET; // Use IPv4
-		server.sin_addr.s_addr = htonl(INADDR_ANY); // My IP
-		server.sin_port = htons(atoi(argv[1])); // Server Port
 
 
     // 2. Bind the socket to server address.
-	if ((bind(sockfd, (struct sockaddr *) &server, sizeof(server))) == -1) {
-        close(sockfd);
-        perror("Can't bind");
-    }
+
 
     // 3. Wait until datagram packet arrives from client.
-	printf("listener: waiting to recvfrom...\n");
-    if (listen(sockfd, 5) == -1) {
-        perror("Can't listen for connections");
-        exit(-1);
-    }
+
 
     // 4. Process the datagram packet and send a reply to client.
     // 5. Go back to Step 3.
