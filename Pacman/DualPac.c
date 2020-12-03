@@ -18,6 +18,12 @@
 // gcc DualPac.c common/*.c common/Linux/MicroGlut.c -o DualPac -I common -I common/Linux -DGL_GLEXT_PROTOTYPES -lGL -lX11 -lopenal -lm
 // Most source files have also been tested on MS Windows
 // Visual Studio files are included but are not tested recently.
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <arpa/inet.h>
 
 #ifdef __APPLE__
 	#include <OpenGL/gl3.h>
@@ -57,6 +63,19 @@ int gridSizeY = 9;
 int blockSize = 64;
 float xMargin = 50.0;
 float yMargin = 50.0;
+
+
+char recvline[1000];
+char sendline[1000];
+int n;
+
+
+struct network_info {
+	int sockfd;
+	struct sockaddr_in servaddr;
+};
+
+struct network_info n_info;
 
 typedef struct GridSpriteRec
 {
@@ -130,7 +149,7 @@ void HandleGridSprite(SpritePtr sp)
 				PlaySound(blipsnd);
 				// NETWORK ISSUE - must be the same on both!
 			}
-		
+
 		// Decide new direction!
 		d = gsp->direction;
 		cfv = GetNeighborGridValue(gsp->gridX, gsp->gridY, d);
@@ -159,7 +178,7 @@ void HandleGridSprite(SpritePtr sp)
 			}
 		}
 	}
-	
+
 	// if direction / switch direction
 	if (gsp->ghostkind < 0)
 	{
@@ -187,7 +206,7 @@ GridSpritePtr NewGridSprite(int h, int v, int dir)
 	GridSpritePtr gsp;
 	gsp = (GridSpriteRec *)malloc(sizeof(GridSpriteRec));
 	InitSprite((SpritePtr)gsp);
-	
+
 	gsp->gridX = h;
 	gsp->gridY = v;
 	gsp->direction = dir;
@@ -272,7 +291,7 @@ void MyBackground()
 	char s[256];
 
 	DrawBackground();
-	
+
 	// Draw the map
 	for (h = 0; h < gridSizeX-1; h++)
 		for (v = 0; v < gridSizeY-1; v++)
@@ -301,7 +320,7 @@ void MyBackground()
 				DrawFace(pill[0], position, 0);
 			}
 		}
-		
+
 	sprintf(s, "Score: %d", score1);
 	sfDrawString(20, 40, s);
 	sprintf(s, "Score: %d", score2);
@@ -314,10 +333,10 @@ void Init()
 {
 	int i, s, r, rl;
 //	TextureData texture;
-	
+
 // Ugly background - the same one that I used in the past.
 	LoadTGATextureSimple("graphics/stars.tga", &backgroundTexID); // Bakgrund
-	
+
 	vertical = GetFace("graphics/Vertical.tga");
 	horizontal = GetFace("graphics/Horizontal.tga");
 	pill[0] = GetFace("graphics/pill1.tga");
@@ -340,17 +359,17 @@ void Init()
 	deathFace[1] = GetFace("graphics/die2.tga");
 	deathFace[2] = GetFace("graphics/die3.tga");
 	deathFace[3] = GetFace("graphics/die4.tga");
-	
+
 	CreateGhost(1, 1, 4, 0);
 	CreateGhost(3, 1, 4, 1);
 	CreateGhost(1, 4, 4, 2);
 	pacman1 = CreatePacman(8, 6, 4);
 	pacman2 = CreatePacman(8, 6, 2);
-	
+
 	snd = LoadSound("sounds/toff16.wav");
 	blipsnd = LoadSound("sounds/Blip.wav");
 	losesnd = LoadSound("sounds/Lose.wav");
-	
+
 	map = readFile("map.txt");
 	// Analyze map here if variable size is supported
 	s = 0; // Previous row start
@@ -369,7 +388,7 @@ void Init()
 	gridSizeY = r;
 	printf("Map size %d %d\n", gridSizeX, gridSizeY);
 	printf("Map data size %d\n", i);
-	
+
 	// Init font
 	sfMakeRasterFont();
 
@@ -391,18 +410,23 @@ void Key(unsigned char key,
 {
 	int d1 = -1;
 	int d2 = -1;
-	
+	char* send_buf;
+
 	// ((GridSpritePtr)pacman1)->nextDirection = 1;break;
-	
+
 	switch (key)
 	{
 		case 'w':
+			send_buf = "w";
 			d1 = 3;break;
 		case 'a':
+			send_buf = "a";
 			d1 = 2;break;
 		case 's':
+			send_buf = "s";
 			d1 = 1;break;
 		case 'd':
+			send_buf = "d";
 			d1 = 0;break;
 		case 'i':
 			d2 = 3;break;
@@ -415,9 +439,9 @@ void Key(unsigned char key,
 		case 0x1b:
 			exit(0);
 	}
-	
 
-	
+
+
 	//================================= Local Player ========================================================
 
 	// Test whether the new direction should be applied immediately or later
@@ -426,6 +450,21 @@ void Key(unsigned char key,
 
 	if (d1 > -1)
 	{
+		printf("Sending buffer: %s\n", send_buf);
+		if (sendto(n_info.sockfd,(const char *)send_buf,1000,0,
+					 (struct sockaddr *)&n_info.servaddr,sizeof(n_info.servaddr)) < 0) {
+						 perror("Error when sending: ");
+					 }
+		printf("WAITING FOR RESPONSE from %d\n", n_info.sockfd);
+		if (n=recvfrom(n_info.sockfd,recvline,10000,0,NULL,NULL) <  0){
+			perror("Error: ");
+		}
+		recvline[n]=0;
+		printf("RECIEVED RESPONSE with length%d\n", n);
+		printf("Response from UDP server: \n");
+		printf(recvline);
+		fputs(recvline,stdout);
+		/*
 		if (d1 == pacman1->direction) return;
 		if ((d1+2 % 4) == pacman1->direction && pacman1->direction != 4) // turn around
 		{
@@ -435,7 +474,9 @@ void Key(unsigned char key,
 			pacman1->partMove = 1 - pacman1->partMove;
 			pacman1->nextDirection = d1;
 		}
-		else
+		*/
+	}
+		else {
 			pacman1->nextDirection = d1;
 	}
 
@@ -461,28 +502,44 @@ void Key(unsigned char key,
 	}
 }
 
-
-void InitNetwork()
+void InitNetwork(char* ipv4)
 {
 // YOUR CODE HERE
 // Establish connection with the other computer
 
 // ========== Setup UDP ================
 /* Theory:
-In UDP, the client does not form a connection with the server like in TCP and instead just sends a datagram. 
-Similarly, the server need not accept a connection and just waits for datagrams to arrive. 
+In UDP, the client does not form a connection with the server like in TCP and instead just sends a datagram.
+Similarly, the server need not accept a connection and just waits for datagrams to arrive.
 Datagrams upon arrival contain the address of sender which the server uses to send data to the correct client. */
 
 
-	
-
-    // 1. Create UDP socket.
-
+		// 1. Create UDP socket.
+		printf("=================INITING NETWORK================\n");
+		printf("configuring server for address: %s\n", ipv4);
+		int sockfd;
+		struct sockaddr_in servaddr,cliaddr;
+		int key;
 
 		// 1.1 Configure socket
+		sockfd=socket(AF_INET,SOCK_DGRAM,0);
+
+		printf("SOCKFD: %d\n", sockfd);
+		printf("AF_INET: %d\n", AF_INET);
+		printf("SOCK_DGRAM: %d\n", SOCK_DGRAM);
 
 
-    // 2. Bind the socket to server address.
+		// 2. Bind the socket to server address.
+		bzero(&servaddr,sizeof(servaddr));
+		servaddr.sin_family = AF_INET;
+		servaddr.sin_addr.s_addr=inet_addr(ipv4);
+		servaddr.sin_port=htons(32000);
+
+		printf("Setup client complete on adress %d\n", servaddr.sin_addr.s_addr);
+
+		n_info.sockfd = sockfd;
+		n_info.servaddr = servaddr;
+		return;
 
 
     // 3. Wait until datagram packet arrives from client.
@@ -500,21 +557,21 @@ Datagrams upon arrival contain the address of sender which the server uses to se
 // 2. using bind(), Bind the socket to server address.
 // 3. using listen(), put the server socket in a passive mode, where it waits for the client to approach the server to make a connection
 // 4. using accept(), At this point, connection is established between client and server, and they are ready to transfer data.
-// 5. Go back to Step 3. 
+// 5. Go back to Step 3.
 
 }
 
 int main(int argc, char **argv)
 {
 	InitCallMeAL(8);
-	InitSpriteLight(argc, argv, 950, 680, "Dual PacMan base game for TSIN02");
+	InitSpriteLight(argc, argv, 950, 680, "Dual PacMan base game for TSIN02\n");
 	// Install your own GLUT callbacks for keyboard and mouse
 	glutKeyboardFunc(Key);
 	glutMouseFunc(Mouse);
 	sfSetRasterSize(950, 680);
 	Init();
-	InitNetwork();
-	
+	InitNetwork(argv[1]);
+
 	// Start
 	glutMainLoop();
 	HaltCallMeAL();
