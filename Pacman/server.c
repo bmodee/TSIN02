@@ -55,6 +55,8 @@ socklen_t len;
 char* resp;
 
 
+
+
 typedef struct GridSpriteRec
 {
 	struct SpriteRec sp;
@@ -64,6 +66,7 @@ typedef struct GridSpriteRec
 	int gridX, gridY;
 	float partMove; // 0 to 1
 	int nextDirection; // For player controlled sprites
+	int id; // Added for ez pz sprite recognition
 } GridSpriteRec, *GridSpritePtr;
 
 vec2 GridPosToPos(int x, int y, int dir, float partMove)
@@ -312,6 +315,50 @@ void newDirection(int d1){
   }
 }
 
+
+//============================Our stuff ================================
+
+//static int maxClient = 5; // how many player that can play simultaneously
+#define maxClient 5
+
+
+typedef struct GridSpriteLite{
+	int adress;
+	int direction; // 0, 1, 2, 3
+	int gridX, gridY;
+	int nextDirection; // For player controlled sprites
+};
+
+typedef struct ClientSprite{
+	int adress;
+	GridSpriteRec sprite;
+};
+
+struct GridSpriteLite clientListLite[maxClient];
+struct ClientSprite clientList[maxClient]; // List of all clients
+
+void AddClientToList(int clientAddress){
+	printf("Adding client to list with clientAddress: %d\n", clientAddress);
+	int i;
+	for (i=0; i<maxClient; i++){
+		// kolla om ClientSprite object med attribute address  finns i clientList == clientAddress
+			// Om den finns gör inget
+		// annars lägg till ett ClientSprite object i clientList
+			return;
+	}
+}
+
+void RemoveClientFromList(int clientAddress){
+	// gå igenom listan
+		// kolla om ClientSprite object med attribute address  finns i clientList == clientAddress
+			// Om True ta bort
+	// om det inte går printa Error
+	return;
+
+
+}
+
+
 void* GameTick(void* vargp) {
   int* myid = (int*) vargp;
   //int a = 0;
@@ -320,7 +367,7 @@ void* GameTick(void* vargp) {
 		float a = 1/128;
 		sleep(a);
     HandleGridSprite(pacman1);
-		printf("Network tick, pos X: %d, pos Y: %d, current direction %d, next direction %d\r", pacman1->gridX, pacman1->gridY, pacman1->direction, pacman1->nextDirection);
+		//printf("Network tick, pos X: %d, pos Y: %d, current direction %d, next direction %d\r", pacman1->gridX, pacman1->gridY, pacman1->direction, pacman1->nextDirection);
     //printf("Gametick tid: %d\nGame tick number: %d\n", *myid, a);
     //()++a;
     //printf("GameTick runs\n");
@@ -329,6 +376,7 @@ void* GameTick(void* vargp) {
 
 void* NetworkTick(void* vargp) {
   int* myid = (int*) vargp;
+	//AddClientToList(cliaddr);
 
   for (;;)
   {
@@ -336,6 +384,8 @@ void* NetworkTick(void* vargp) {
 	     //printf("waiting for packets..\n");
 	     len = sizeof(cliaddr);
 	     n = recvfrom(sockfd,mesg,1000,0,(struct sockaddr *)&cliaddr,&len);
+			 printf("Client address: %d\n", cliaddr);
+
 	     //sendto(sockfd,mesg,n,0,(struct sockaddr *)&cliaddr,sizeof(cliaddr));
 	     //printf("-------------------------------------------------------\n");
 	     mesg[n] = 0;
@@ -372,6 +422,7 @@ void* NetworkTick(void* vargp) {
 	     //printf("-------------------------------------------------------\n");
 	  }
 }
+
 
 void InitNetwork() {
   printf("starting server...\n");

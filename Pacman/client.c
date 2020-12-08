@@ -32,7 +32,7 @@
 #include "LoadTGA.h"
 #include "VectorUtils3.h"
 
-
+int clientId;
 
 //=======================================================
 
@@ -45,6 +45,7 @@ typedef struct GridSpriteRec
 	int gridX, gridY;
 	float partMove; // 0 to 1
 	int nextDirection; // For player controlled sprites
+	int id;// Added for ez pz sprite recognition
 } GridSpriteRec, *GridSpritePtr;
 
 
@@ -79,6 +80,7 @@ int main(int argc, char**argv)
    servaddr.sin_port=htons(32000);
 
 	 printf("Connected to socket: %d\n", sockfd);
+	 //printf("You are client # %d\n", clientId); //Shows which client number player is, not working
 	 //printf("On adress: %d\n", servaddr.sin_addr.s_addr);
 
    printf("Type anything followed by CR!\n");
