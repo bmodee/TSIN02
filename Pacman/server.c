@@ -52,7 +52,6 @@ float yMargin = 50.0;
 int sockfd,n;
 struct sockaddr_in servaddr,cliaddr;
 socklen_t len;
-char mesg[1000];
 char* resp;
 
 
@@ -315,63 +314,63 @@ void newDirection(int d1){
 
 void* GameTick(void* vargp) {
   int* myid = (int*) vargp;
-  int a = 0;
+  //int a = 0;
 
   for (;;){
-
-    //HandleGridSprite(pacman1);
+		float a = 1/128;
+		sleep(a);
+    HandleGridSprite(pacman1);
+		printf("Network tick, pos X: %d, pos Y: %d, current direction %d, next direction %d\r", pacman1->gridX, pacman1->gridY, pacman1->direction, pacman1->nextDirection);
     //printf("Gametick tid: %d\nGame tick number: %d\n", *myid, a);
-    //++a;
-    printf("a");
+    //()++a;
+    //printf("GameTick runs\n");
   }
 }
 
 void* NetworkTick(void* vargp) {
   int* myid = (int*) vargp;
 
-  for(;;) {
-  printf("b");
-}
-/*
   for (;;)
   {
-     printf("waiting for packets..\n");
-     len = sizeof(cliaddr);
-     n = recvfrom(sockfd,mesg,1000,0,(struct sockaddr *)&cliaddr,&len);
-     //sendto(sockfd,mesg,n,0,(struct sockaddr *)&cliaddr,sizeof(cliaddr));
-     printf("-------------------------------------------------------\n");
-     mesg[n] = 0;
-     printf("Received the following:\n");
-     printf(mesg);
-     printf("\n");
+			 char mesg[1000];
+	     //printf("waiting for packets..\n");
+	     len = sizeof(cliaddr);
+	     n = recvfrom(sockfd,mesg,1000,0,(struct sockaddr *)&cliaddr,&len);
+	     //sendto(sockfd,mesg,n,0,(struct sockaddr *)&cliaddr,sizeof(cliaddr));
+	     //printf("-------------------------------------------------------\n");
+	     mesg[n] = 0;
+	     //printf("Received the following:\n");
+	     //printf(mesg);
+	     //printf("\n");
 
-     if (strcmp(mesg, "w") == 0) {
-       newDirection(3);
-       resp = "going up\n";
-     } else if (strcmp(mesg, "s") == 0) {
-       newDirection(1);
-       resp = "going down\n";
-     } else if (strcmp(mesg, "a") == 0) {
-       newDirection(2);
-       resp = "going left\n";
-     } else if (strcmp(mesg, "d") == 0) {
-       newDirection(0);
-       resp = "going right\n";
-     } else {
-       resp = "bad input\n";
-     }
-     printf("Current direction %d\n", pacman1->direction);
-     printf("Next Direction %d\n", pacman1->nextDirection);
+	     if (strcmp(mesg, "w") == 10) {
+	       newDirection(3);
+	       resp = "going up\n";
+	     } else if (strcmp(mesg, "s") == 10) {
+	       newDirection(1);
+	       resp = "going down\n";
+	     } else if (strcmp(mesg, "a") == 10) {
+	       newDirection(2);
+	       resp = "going left\n";
+	     } else if (strcmp(mesg, "d") == 10) {
+	       newDirection(0);
+	       resp = "going right\n";
+	     } else {
+	       resp = "bad input\n";
+	     }
+			 /*
+	     printf("Current direction %d\n", pacman1->direction);
+	     printf("Next Direction %d\n", pacman1->nextDirection);
+	     printf("pacman1 pos x %d\n", pacman1->gridX);
+	     printf("pacman1 pos y %d\n", pacman1->gridY);
+			 */
 
-     printf("pacman1 pos x %d\n", pacman1->gridX);
-     printf("pacman1 pos y %d\n", pacman1->gridY);
-
-     if (sendto(sockfd,resp,strlen(resp),0,(struct sockaddr *)&cliaddr,sizeof(cliaddr))< 0 ){
-       perror("Error msg");
-     }
-     printf("Networktick tid: %d", *myid);
-     printf("-------------------------------------------------------\n");
-  }*/
+	     if (sendto(sockfd,resp,strlen(resp),0,(struct sockaddr *)&cliaddr,sizeof(cliaddr))< 0 ){
+	       perror("Error msg");
+	     }
+	     //printf("Networktick tid: %d", *myid);
+	     //printf("-------------------------------------------------------\n");
+	  }
 }
 
 void InitNetwork() {
@@ -401,4 +400,7 @@ int main(int argc, char**argv)
 
    pthread_create(&tid1, NULL, NetworkTick, NULL);
    pthread_create(&tid2, NULL, GameTick, NULL);
+	 while(true);  //Main thread executing
+
+	 //thread_create(ID, default attr, func, arg to func);
 }

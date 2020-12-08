@@ -32,6 +32,28 @@
 #include "LoadTGA.h"
 #include "VectorUtils3.h"
 
+
+
+//=======================================================
+
+typedef struct GridSpriteRec
+{
+	struct SpriteRec sp;
+
+	int ghostkind; // I.e. ghost number
+	int direction; // 0, 1, 2, 3
+	int gridX, gridY;
+	float partMove; // 0 to 1
+	int nextDirection; // For player controlled sprites
+} GridSpriteRec, *GridSpritePtr;
+
+
+
+
+
+
+//=======================================================
+
 int main(int argc, char**argv)
 {
    int sockfd,n;
@@ -64,9 +86,17 @@ int main(int argc, char**argv)
    //while (fgets(sendline, 10000,stdin) != NULL)
    //system("/bin/stty raw");
    while (fgets(sendline, 10000, stdin) != NULL) {
+		 /*
+		 		printf("===========\n");
+		 		printf ("strcmp w: %d\n", strcmp(sendline, "w"));
+				printf ("strcmp a: %d\n", strcmp(sendline, "a"));
+				printf ("strcmp s: %d\n", strcmp(sendline, "s"));
+				printf ("strcmp d: %d\n", strcmp(sendline, "d"));
+				printf("===========\n");
+			*/
         sendto(sockfd,sendline,strlen(sendline),0,
                (struct sockaddr *)&servaddr,sizeof(servaddr));
-			 printf("WAITING FOR RESPONSE from %d\n", sockfd);
+			  printf("WAITING FOR RESPONSE from %d\n", sockfd);
         n=recvfrom(sockfd,recvline,10000,0,NULL,NULL);
         recvline[n]=0;
         printf("Response from UDP server: \n");
