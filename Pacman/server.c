@@ -273,8 +273,10 @@ void Init()
 	CreateGhost(1, 1, 4, 0);
 	CreateGhost(3, 1, 4, 1);
 	CreateGhost(1, 4, 4, 2);
-	pacman1 = CreatePacman(8, 6, 4);
-	pacman2 = CreatePacman(8, 6, 2);
+
+	//pacmans are created upon connect now
+	//pacman1 = CreatePacman(8, 6, 4);
+	//pacman2 = CreatePacman(8, 6, 2);
 
 
 	map = readFile("map.txt");
@@ -300,7 +302,8 @@ void Init()
 }
 
 
-void newDirection(int d1){
+void newDirection(int d1, struct sockaddr_in clientAddress){
+	printf("newDirection() got client address: %d\n", clientAddress);
   if (d1 == pacman1->direction) return;
   if ((d1+2 % 4) == pacman1->direction && pacman1->direction != 4) // turn around
   {
@@ -323,38 +326,81 @@ void newDirection(int d1){
 
 
 typedef struct GridSpriteLite{
-	int adress;
-	int direction; // 0, 1, 2, 3
-	int gridX, gridY;
-	int nextDirection; // For player controlled sprites
+ 	unsigned long address;
+	int* direction; // 0, 1, 2, 3
+	int* gridX, gridY;
+	int* nextDirection; // For player controlled sprites
 };
 
 typedef struct ClientSprite{
-	int adress;
-	GridSpriteRec sprite;
+	unsigned long address;
+	GridSpritePtr sprite;
 };
 
 struct GridSpriteLite clientListLite[maxClient];
 struct ClientSprite clientList[maxClient]; // List of all clients
 
-void AddClientToList(int clientAddress){
-	printf("Adding client to list with clientAddress: %d\n", clientAddress);
+void AddClientToList(struct ClientSprite cSprite){
+	printf("-------------------------------------------------------\n");
+	printf("Adding client to list with client address: %d\n", cSprite.address);
 	int i;
+	bool isinlist = false;
 	for (i=0; i<maxClient; i++){
-		// kolla om ClientSprite object med attribute address  finns i clientList == clientAddress
-			// Om den finns gör inget
-		// annars lägg till ett ClientSprite object i clientList
-			return;
+		if ( clientList[i].address == cSprite.address){
+			isinlist = true;
+			printf("found address in list\n");
+			//do nothing since we dont want to add the same address more than once
+			break;
+		}
+
+	}if (isinlist == false){
+		//add client address to list
+		for (i=0; i<maxClient; i++){
+			if (clientList[i].address == NULL){
+
+				printf("Adding Pacman to list\n");
+				struct GridSpriteLite newSprite;
+				newSprite.address = cSprite.address;
+				newSprite.direction = &cSprite.sprite->direction;
+				newSprite.gridX = &cSprite.sprite->gridX;
+				newSprite.gridY = &cSprite.sprite->gridY;
+				newSprite.nextDirection = &cSprite.sprite->nextDirection;
+
+
+				clientList[i] = cSprite;
+				printf("Pacman added successfully\n");
+				printf("clientList[i].address: %d\n", clientList[i].address);
+
+				printf("-------------------------------------------------------\n");
+
+
+				return;
+			}else{
+				printf("List is full\n");
+				printf("-------------------------------------------------------\n");
+
+				return;
+			}
+		}
 	}
 }
 
 void RemoveClientFromList(int clientAddress){
-	// gå igenom listan
-		// kolla om ClientSprite object med attribute address  finns i clientList == clientAddress
-			// Om True ta bort
-	// om det inte går printa Error
+	//pseudo func for removing player upon disconnect
+	//TODO if time allows
 	return;
 
+
+}
+
+void InitPacman(unsigned long clientAddress){
+	//pacman created, both players have the same starting position
+	GridSpritePtr pacman = CreatePacman(8, 6, 4);
+	struct ClientSprite cSprite;
+	printf("Client addres in init pacman: %d\n", clientAddress);
+	cSprite.address = clientAddress;
+	cSprite.sprite = pacman;
+	AddClientToList(cSprite);
 
 }
 
@@ -362,16 +408,20 @@ void RemoveClientFromList(int clientAddress){
 void* GameTick(void* vargp) {
   int* myid = (int*) vargp;
   //int a = 0;
-
+	struct GridSpritePtr *pacman;
   for (;;){
 		float a = 1/128;
 		sleep(a);
-    HandleGridSprite(pacman1);
+		for (int i = 3; i <= maxClient; i++){
+			pacman = &clientList[i].sprite;
+			//HandleGridSprite(pacman);
+		}
 		//printf("Network tick, pos X: %d, pos Y: %d, current direction %d, next direction %d\r", pacman1->gridX, pacman1->gridY, pacman1->direction, pacman1->nextDirection);
     //printf("Gametick tid: %d\nGame tick number: %d\n", *myid, a);
     //()++a;
     //printf("GameTick runs\n");
   }
+
 }
 
 void* NetworkTick(void* vargp) {
@@ -384,7 +434,25 @@ void* NetworkTick(void* vargp) {
 	     //printf("waiting for packets..\n");
 	     len = sizeof(cliaddr);
 	     n = recvfrom(sockfd,mesg,1000,0,(struct sockaddr *)&cliaddr,&len);
+			 printf("-------------------------------------------------------\n");
 			 printf("Client address: %d\n", cliaddr);
+
+
+
+			 //connecting
+			 	//if message is "connceting"
+				printf("Recived mesg connecting\n");
+				printf("Initialize pacman\n");
+				printf("client address sent to initpacman(): %d\n", cliaddr.sin_addr.s_addr);
+				InitPacman(cliaddr.sin_addr.s_addr);
+
+			 //movement
+			 	//if message is "movement"
+					//run movement
+
+			 //disconnect
+			 	//if message is "disconnect"
+					//delete client from list to free space for another player and disconnect
 
 	     //sendto(sockfd,mesg,n,0,(struct sockaddr *)&cliaddr,sizeof(cliaddr));
 	     //printf("-------------------------------------------------------\n");
@@ -394,16 +462,16 @@ void* NetworkTick(void* vargp) {
 	     //printf("\n");
 
 	     if (strcmp(mesg, "w") == 10) {
-	       newDirection(3);
+	       //newDirection(3, cliaddr);
 	       resp = "going up\n";
 	     } else if (strcmp(mesg, "s") == 10) {
-	       newDirection(1);
+	       newDirection(1, cliaddr);
 	       resp = "going down\n";
 	     } else if (strcmp(mesg, "a") == 10) {
-	       newDirection(2);
+	       newDirection(2, cliaddr);
 	       resp = "going left\n";
 	     } else if (strcmp(mesg, "d") == 10) {
-	       newDirection(0);
+	       newDirection(0, cliaddr);
 	       resp = "going right\n";
 	     } else {
 	       resp = "bad input\n";
@@ -425,7 +493,16 @@ void* NetworkTick(void* vargp) {
 
 
 void InitNetwork() {
+	printf("-------------------------------------------------------\n");
   printf("starting server...\n");
+
+
+	//print("oops internet is bad..\n")
+	//BADsetUDPdelay(5, 10);
+	//BADsetTCPdelay(0, 0);
+	//BADsetUDPerrorrate(0);
+
+
 
   sockfd=socket(AF_INET,SOCK_DGRAM,0);
 
@@ -443,15 +520,15 @@ void InitNetwork() {
 
 int main(int argc, char**argv)
 {
-   Init();
-   InitNetwork();
+	Init();
+  InitNetwork();
+  pthread_t tid1;
+  pthread_t tid2;
 
-   pthread_t tid1;
-   pthread_t tid2;
+  pthread_create(&tid1, NULL, NetworkTick, NULL);
 
-   pthread_create(&tid1, NULL, NetworkTick, NULL);
-   pthread_create(&tid2, NULL, GameTick, NULL);
-	 while(true);  //Main thread executing
+  pthread_create(&tid2, NULL, GameTick, NULL);
+	while(true);  //Main thread executing
 
 	 //thread_create(ID, default attr, func, arg to func);
 }
