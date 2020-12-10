@@ -119,7 +119,7 @@ make_window( Display *dpy, const char *name,
 		glXCreateContextAttribsARBProc glXCreateContextAttribsARB = 0;
 
 		// Verify that GLX implementation supports the new context create call
-		if ( strstr( glXQueryExtensionsString( dpy, scrnum ), 
+		if ( strstr( glXQueryExtensionsString( dpy, scrnum ),
 			"GLX_ARB_create_context" ) != 0 )
 		glXCreateContextAttribsARB = (glXCreateContextAttribsARBProc)
 			glXGetProcAddress( (const GLubyte *) "glXCreateContextAttribsARB" );
@@ -302,7 +302,7 @@ void glutCreateWindow(char *windowTitle)
    }
 
    make_window(dpy, windowTitle, winPosX, winPosY, winWidth, winHeight, &win, &ctx);
-   
+
    XMapWindow(dpy, win);
    glXMakeCurrent(dpy, win, ctx);
 }
@@ -370,7 +370,7 @@ void glutMainLoop()
          		if (event.xclient.data.l[0] == wmDeleteMessage) // quit!
          			done = 1;
 	         	break;
-         	case Expose: 
+         	case Expose:
 				break; // Update event! Should do draw here.
          	case ConfigureNotify:
 				if (gReshape)
@@ -416,7 +416,7 @@ void glutMainLoop()
 			break;
          }
       }
-      
+
       if (animate)
       {
       	animate = 0;
@@ -449,7 +449,7 @@ void glutPostRedisplay()
 int glutGet(int type)
 {
 	struct timeval tv;
-	
+
 	gettimeofday(&tv, NULL);
 	return (tv.tv_usec - timeStart.tv_usec) / 1000 + (tv.tv_sec - timeStart.tv_sec)*1000;
 }
@@ -640,5 +640,3 @@ void glutToggleFullScreen()
 	else
 		glutFullScreen();
 }
-
-

@@ -65,14 +65,17 @@ int main(int argc, char**argv)
 
    if (argc != 2)
    {
-      printf("usage:  udpcli <IP address>\n");
-      exit(1);
+		 printf("usage:  udpcli <IP address>\n");
+     exit(1);
    }
 
    sockfd=socket(AF_INET,SOCK_DGRAM,0);
-	 printf("SOCKFD: %d\n", sockfd);
+	 	printf("-------------------------------------------------------\n");
+	 	printf("SOCKFD: %d\n", sockfd);
 		printf("AF_INET: %d\n", AF_INET);
 		printf("SOCK_DGRAM: %d\n", SOCK_DGRAM);
+		printf("-------------------------------------------------------\n");
+
 
    bzero(&servaddr,sizeof(servaddr));
    servaddr.sin_family = AF_INET;
@@ -81,7 +84,8 @@ int main(int argc, char**argv)
 
 	 printf("Connected to socket: %d\n", sockfd);
 	 //printf("You are client # %d\n", clientId); //Shows which client number player is, not working
-	 //printf("On adress: %d\n", servaddr.sin_addr.s_addr);
+	 printf("On adress: %d\n", servaddr);
+	 printf("-------------------------------------------------------\n");
 
    printf("Type anything followed by CR!\n");
 

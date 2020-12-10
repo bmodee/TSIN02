@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <arpa/inet.h>
+
 
 #ifdef __APPLE__
 	#include <OpenGL/gl3.h>
@@ -303,7 +305,7 @@ void Init()
 
 
 void newDirection(int d1, struct sockaddr_in clientAddress){
-	printf("newDirection() got client address: %d\n", clientAddress);
+	printf("newDirection() got client address: %ld\n", clientAddress);
   if (d1 == pacman1->direction) return;
   if ((d1+2 % 4) == pacman1->direction && pacman1->direction != 4) // turn around
   {
@@ -342,7 +344,7 @@ struct ClientSprite clientList[maxClient]; // List of all clients
 
 void AddClientToList(struct ClientSprite cSprite){
 	printf("-------------------------------------------------------\n");
-	printf("Adding client to list with client address: %d\n", cSprite.address);
+	printf("Adding client to list with client address: %dl\n", cSprite.address);
 	int i;
 	bool isinlist = false;
 	for (i=0; i<maxClient; i++){
@@ -397,7 +399,7 @@ void InitPacman(unsigned long clientAddress){
 	//pacman created, both players have the same starting position
 	GridSpritePtr pacman = CreatePacman(8, 6, 4);
 	struct ClientSprite cSprite;
-	printf("Client addres in init pacman: %d\n", clientAddress);
+	printf("Client addres in InitPacman() L400: %d\n", clientAddress);
 	cSprite.address = clientAddress;
 	cSprite.sprite = pacman;
 	AddClientToList(cSprite);
@@ -435,15 +437,19 @@ void* NetworkTick(void* vargp) {
 	     len = sizeof(cliaddr);
 	     n = recvfrom(sockfd,mesg,1000,0,(struct sockaddr *)&cliaddr,&len);
 			 printf("-------------------------------------------------------\n");
-			 printf("Client address: %d\n", cliaddr);
+			 printf("Client address 1 : %d\n", &cliaddr);
+			 printf("Client address 2: %d\n", (struct sockaddr *)&cliaddr);
+			 char * realAddr = inet_ntoa(cliaddr.sin_addr);
+			 printf("realADDr%s\n", realAddr);
 
 
 
-			 //connecting
+			//connecting
 			 	//if message is "connceting"
 				printf("Recived mesg connecting\n");
 				printf("Initialize pacman\n");
-				printf("client address sent to initpacman(): %d\n", cliaddr.sin_addr.s_addr);
+				printf("client address sent to initpacman() L446: %u\n", cliaddr.sin_addr.s_addr);
+				//&int hej = (int)cliaddr;
 				InitPacman(cliaddr.sin_addr.s_addr);
 
 			 //movement
@@ -492,9 +498,10 @@ void* NetworkTick(void* vargp) {
 }
 
 
-void InitNetwork() {
+void InitNetwork(char* addr) {
 	printf("-------------------------------------------------------\n");
   printf("starting server...\n");
+	printf("addr%s\n", addr);
 
 
 	//print("oops internet is bad..\n")
@@ -508,20 +515,20 @@ void InitNetwork() {
 
   bzero(&servaddr,sizeof(servaddr));
   servaddr.sin_family = AF_INET;
-  servaddr.sin_addr.s_addr=INADDR_ANY;
+  servaddr.sin_addr.s_addr= INADDR_ANY;
   servaddr.sin_port=htons(32000);
   if (bind(sockfd,(struct sockaddr *)&servaddr,sizeof(servaddr))<0) {
     printf("BIND FAILED\n");
   }
 
   printf("setup complete on socket: %d\n", sockfd);
-  printf("running on adress: %s\n", servaddr.sin_addr.s_addr);
+  printf("running on adress: %lu\n", servaddr.sin_addr.s_addr);
 }
 
 int main(int argc, char**argv)
 {
 	Init();
-  InitNetwork();
+  InitNetwork(argv[1]);
   pthread_t tid1;
   pthread_t tid2;
 
