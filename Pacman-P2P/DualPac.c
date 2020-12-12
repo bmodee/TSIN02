@@ -462,12 +462,13 @@ void Key(unsigned char key,
 			pacman2->nextDirection = d1;
 	}
 
+	d1 = d1 + 2;
 
 	if(d1 > -1){
 		if (sendto(sockfd,&d1,strlen(&d1),0,(struct sockaddr *)&servaddr, sizeof(servaddr))< 0 ){
 	 	 perror("Error msg");
 	 }
-	 printf("sent object: %d\n", d1);
+	 printf("sent instruction: %d to player%d\n", d1, (player == 1 ? 2 : 1));
   }
 
 
@@ -560,14 +561,15 @@ void NetworkTick(){
 		if (n = recvfrom(sockfd,mesg,1000,0,(struct sockaddr *)&servaddr,&len)<0){
 			perror("error");
 		}
-		printf("player #%d recived %d\n",player, *mesg);
-
-
+	
+		
 
 		if (player == 1) {
-			p2 = *mesg;
+			p2 = *mesg - 2;
+			printf("player1 recived %d\n", p2);
 		} else if (player == 2) {
-			p1 = *mesg;
+			p1 = *mesg - 2;
+			printf("player2 recived %d\n", p1);
 		}
 		//================================= Local Player ========================================================
 
@@ -621,17 +623,23 @@ int main(int argc, char **argv)
 	player = 1;
 	InitCallMeAL(8);
 	InitSpriteLight(argc, argv, 950, 680, "Dual PacMan base game for TSIN02");
-	// Install your own GLUT callbacks for keyboard and mouse
+	
+	//Network init
 	InitNetwork(argv[1]);
+	pthread_t tid1;
+	pthread_create(&tid1, NULL, NetworkTick, NULL);
+	
+	// Install your own GLUT callbacks for keyboard and mouse
 	glutKeyboardFunc(Key);
 	glutMouseFunc(Mouse);
 	sfSetRasterSize(950, 680);
+
+
+	printf("Before the init\n");
+	
 	Init();
 
-
 	//thread management
-	pthread_t tid1;
-	pthread_create(&tid1, NULL, NetworkTick, NULL);
 
 	// Start
 	glutMainLoop();
