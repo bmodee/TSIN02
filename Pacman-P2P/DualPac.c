@@ -76,6 +76,8 @@ struct sockaddr_in servaddr,cliaddr;
 socklen_t len;
 char* resp;
 
+char prevKey = '0';
+
 
 typedef struct GridSpriteRec
 {
@@ -409,8 +411,9 @@ void Key(unsigned char key,
          __attribute__((unused)) int y)
 	#endif
 {
-	printf("inne i key för player %d\n", player);
 	d1 = -1;
+	//printf("Player%d pressed key %c\n", (player == 1 ? 1 : 2), key);
+
 
 	// ((GridSpritePtr)pacman1)->nextDirection = 1;break;
 	switch (key) {
@@ -426,7 +429,7 @@ void Key(unsigned char key,
 			exit(0);
 	}
 
-	if (player == 1 && d1 > -1)
+	if (player == 2 && d1 > -1)
 	{
 		if (d1 == pacman1->direction) return;
 		if ((d1+2 % 4) == pacman1->direction && pacman1->direction != 4) // turn around
@@ -447,7 +450,7 @@ void Key(unsigned char key,
 	// Test whether the new direction should be applied immediately or later
 	// REPLACE THIS! This should be controlled from the remote player!
 
-	if (player == 2 && d1 > -1)
+	if (player == 1 && d1 > -1)
 	{
 		if (d1 == pacman2->direction) return;
 		if ((d1+2 % 4) == pacman2->direction && pacman2->direction != 4) // turn around
@@ -462,18 +465,15 @@ void Key(unsigned char key,
 			pacman2->nextDirection = d1;
 	}
 
-	d1 = d1 + 2;
-
-	if(d1 > -1){
-		if (sendto(sockfd,&d1,strlen(&d1),0,(struct sockaddr *)&servaddr, sizeof(servaddr))< 0 ){
-	 	 perror("Error msg");
-	 }
-	 printf("sent instruction: %d to player%d\n", d1, (player == 1 ? 2 : 1));
-  }
-
-
-
+	if(d1 > -1) {
+		d1 = d1 + 2;
+		if (sendto(sockfd,&d1,strlen(&d1),0,(struct sockaddr *)&servaddr, sizeof(servaddr))< 0 )
+		perror("Error msg");
+	//printf("sent instruction: %d to player%d\n", d1 - 2, (player == 1 ? 2 : 1));
+	}
 }
+
+
 
 
 
@@ -498,36 +498,42 @@ Datagrams upon arrival contain the address of sender which the server uses to se
 
 
     sockfd=socket(AF_INET,SOCK_DGRAM,0);
- 	 	printf("-------------------------------------------------------\n");
- 	 	printf("SOCKFD: %d\n", sockfd);
- 		printf("AF_INET: %d\n", AF_INET);
- 		printf("SOCK_DGRAM: %d\n", SOCK_DGRAM);
- 		printf("-------------------------------------------------------\n");
+	printf("-------------------------------------------------------\n");
+	printf("SOCKFD: %d\n", sockfd);
+	printf("AF_INET: %d\n", AF_INET);
+	printf("SOCK_DGRAM: %d\n", SOCK_DGRAM);
+	printf("-------------------------------------------------------\n");
 
 
 		// ============== 1.1 Configure socket ==============
 
-		bzero(&servaddr,sizeof(servaddr));
+	bzero(&servaddr,sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr=INADDR_ANY;
     servaddr.sin_port=htons(32000);
 
-		printf("Connected to socket: %d\n", sockfd);
- 	 	printf("On adress: %d\n", servaddr);
- 	 	printf("-------------------------------------------------------\n");
+	printf("Connected to socket: %d\n", sockfd);
+	printf("On adress: %d\n", servaddr);
+	printf("-------------------------------------------------------\n");
 
 
     // ============== 2. Bind the socket to peer address. ==============
 
-		if (bind(sockfd,(struct sockaddr *)&servaddr,sizeof(servaddr))<0) {
-			perror("BIND FAILED");
+	if (bind(sockfd,(struct sockaddr *)&servaddr,sizeof(servaddr))<0) {
+		perror("BIND FAILED");
+		player = 2; //player one taken, becomes player 2
+	}
 
-			player = 2; //player one taken, becomes player 2
+	// struct timeval tv;
+	// tv.tv_sec = 0;
+	// tv.tv_usec = 100000;
+	// if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO,&tv,sizeof(tv)) < 0) {
+	// 	perror("Error");
+	// }
 
-	  }
-		printf("YOU ARE PLAYER # %d\n", player);
-	  printf("setup complete on socket: %d\n", sockfd);
-	  printf("running on adress: %lu\n", servaddr.sin_addr.s_addr);
+	printf("YOU ARE PLAYER # %d\n", player);
+	printf("setup complete on socket: %d\n", sockfd);
+	printf("running on adress: %lu\n", servaddr.sin_addr.s_addr);
 
 
 
@@ -551,25 +557,25 @@ Datagrams upon arrival contain the address of sender which the server uses to se
 }
 
 void NetworkTick(){
+	char mesg[1000];
 	for(;;){
-		char mesg[1000];
+		mesg[0] = '\0';
+
 		int p1 = -1;
 		int p2 = -1;
 		//printf("waiting for packets..\n");
 		len = sizeof(&servaddr);
 
-		if (n = recvfrom(sockfd,mesg,1000,0,(struct sockaddr *)&servaddr,&len)<0){
-			perror("error");
-		}
-	
-		
 
+		if (n = recvfrom(sockfd, mesg,1000,0,(struct sockaddr *)&servaddr,&len) == 0)
+			printf("Networktick error: %d\n", mesg);
+	
 		if (player == 1) {
-			p2 = *mesg - 2;
-			printf("player1 recived %d\n", p2);
-		} else if (player == 2) {
 			p1 = *mesg - 2;
-			printf("player2 recived %d\n", p1);
+			//printf("player1 recived %d\n", p1);
+		} else if (player == 2) {
+			p2 = *mesg - 2;
+			//printf("player2 recived %d\n", p2);
 		}
 		//================================= Local Player ========================================================
 
@@ -613,8 +619,7 @@ void NetworkTick(){
 				pacman2->nextDirection = p2;
 		}
 	}
-
-
+	
 
 }
 
