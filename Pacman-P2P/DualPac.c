@@ -21,7 +21,7 @@
 
 
 #include <sys/socket.h>
-#include <sys/types.h> 
+#include <sys/types.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <string.h>
@@ -29,7 +29,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <netdb.h> 
+#include <netdb.h>
 
 
 #ifdef __APPLE__
@@ -169,7 +169,7 @@ void HandleGridSprite(SpritePtr sp)
 		// easier for you!)
 			if (player == 1)
 				gsp->direction = GetRandom(4);
-			else 
+			else
 				gsp->direction = -1;
 		}
 		v = GetNeighborGridValue(gsp->gridX, gsp->gridY, gsp->direction);
@@ -475,14 +475,14 @@ void Key(unsigned char key,
 		else
 			pacman2->nextDirection = d1;
 		// buff[1] = pacman2->gridX;
-		// buff[2] = pacman2->gridY;	
-		// buff[3] = pacman2->direction;	
+		// buff[2] = pacman2->gridY;
+		// buff[3] = pacman2->direction;
 	}
 
 
 	// if(d1 > -1) {
 	// 	d1 = d1 + 2;
-	// 	buff[0] = d1; 
+	// 	buff[0] = d1;
 	// 	if (sendto(sockfdUdp,buff,sizeof(buff),0,(struct sockaddr *)&servaddrUdp, sizeof(servaddrUdp))< 0 )
 	// 	perror("Error msg");
 	//printf("sent instruction: %d to player%d\n", d1 - 2, (player == 1 ? 2 : 1));
@@ -569,72 +569,72 @@ Datagrams upon arrival contain the address of sender which the server uses to se
 // 3. using listen(), put the server socket in a passive mode, where it waits for the client to approach the server to make a connection
 // 4. using accept(), At this point, connection is established between client and server, and they are ready to transfer data.
 // 5. Go back to Step 3.
-	
-	// assign IP, PORT 
+
+	// assign IP, PORT
 	bzero(&servaddrTcp, sizeof(servaddrTcp));
-	servaddrTcp.sin_family = AF_INET; 
-	servaddrTcp.sin_addr.s_addr = INADDR_ANY; 
+	servaddrTcp.sin_family = AF_INET;
+	servaddrTcp.sin_addr.s_addr = INADDR_ANY;
 	servaddrTcp.sin_port = htons(32001);
 
 	printf("PORT TO USE: %d\n", htons(32001));
 
 	if (player == 1) {
-		sockfdTcp = socket(AF_INET, SOCK_STREAM, 0); 
-		if (sockfdTcp == -1) { 
-			printf("socket creation failed...\n"); 
-			exit(0); 
-		} 
+		sockfdTcp = socket(AF_INET, SOCK_STREAM, 0);
+		if (sockfdTcp == -1) {
+			printf("socket creation failed...\n");
+			exit(0);
+		}
 		else
-			printf("Socket successfully created..\n"); 
-		//bzero(&servaddrTcp, sizeof(servaddrTcp)); 
+			printf("Socket successfully created..\n");
+		//bzero(&servaddrTcp, sizeof(servaddrTcp));
 
-		if ((bind(sockfdTcp, (struct sockaddr*)&servaddrTcp, sizeof(servaddrTcp))) != 0) { 
-			printf("socket bind failed...\n"); 
-			exit(0); 
-		} 
+		if ((bind(sockfdTcp, (struct sockaddr*)&servaddrTcp, sizeof(servaddrTcp))) != 0) {
+			printf("socket bind failed...\n");
+			exit(0);
+		}
 		else
-			printf("Socket successfully binded on port %d\n", servaddrTcp.sin_port); 
+			printf("Socket successfully binded on port %d\n", servaddrTcp.sin_port);
 
-		if ((listen(sockfdTcp, 5)) != 0) { 
-			printf("Listen failed...\n"); 
-			exit(0); 
-		} 
+		if ((listen(sockfdTcp, 5)) != 0) {
+			printf("Listen failed...\n");
+			exit(0);
+		}
 		else
-			printf("Server listening..\n"); 
-		len = sizeof(cli); 
+			printf("Server listening..\n");
+		len = sizeof(cli);
 
-		//Accept the data packet from client and verification 
-		connfd = accept(sockfdTcp, (struct sockaddr*)&cli, &len); 
-		if (connfd < 0) { 
-			printf("server acccept failed...\n"); 
-			exit(0); 
-		} 
+		//Accept the data packet from client and verification
+		connfd = accept(sockfdTcp, (struct sockaddr*)&cli, &len);
+		if (connfd < 0) {
+			printf("server acccept failed...\n");
+			exit(0);
+		}
 		else
-		printf("server acccept the client...\n"); 
+		printf("server acccept the client...\n");
 	} else if (player == 2) {
-		// socket create and verification 
-		sockfdTcp = socket(AF_INET, SOCK_STREAM, 0); 
-		if (sockfdTcp == -1) { 
-			printf("socket creation failed...\n"); 
-			exit(0); 
-		} 
+		// socket create and verification
+		sockfdTcp = socket(AF_INET, SOCK_STREAM, 0);
+		if (sockfdTcp == -1) {
+			printf("socket creation failed...\n");
+			exit(0);
+		}
 		else
-			printf("Socket successfully created..\n"); 
+			printf("Socket successfully created..\n");
 
 		// connect the client socket to server socket
-		if (connect(sockfdTcp, (struct sockaddr*)&servaddrTcp, sizeof(servaddrTcp)) != 0) { 
+		if (connect(sockfdTcp, (struct sockaddr*)&servaddrTcp, sizeof(servaddrTcp)) != 0) {
 			perror("client connect: ");
-			//printf("connection with the server failed...\n"); 
-			exit(0); 
-		} 
+			//printf("connection with the server failed...\n");
+			exit(0);
+		}
 		else
-			printf("connected to the server..\n"); 
+			printf("connected to the server..\n");
 		}
 }
 
 void tcpTickClient(){
 	int buff[100];
-    for (;;) { 
+    for (;;) {
 		sleep(1/20);
         bzero(buff, sizeof(buff));
 		//snprintf(buff, "%d%d%d%d", pacman2->gridX, pacman2->gridY, pacman2->direction, 1);
@@ -645,10 +645,10 @@ void tcpTickClient(){
 		buff[4] = pacman2->nextDirection;
 
 		//printf("This is buff on the client before sending: %d, %d, %d, %d, %d, %d\n", buff[0], buff[1], buff[2], buff[3], buff[4], buff[5]);
-        write(sockfdTcp, buff, sizeof(buff)); 
-        bzero(buff, sizeof(buff)); 
+        write(sockfdTcp, buff, sizeof(buff));
+        bzero(buff, sizeof(buff));
         read(sockfdTcp, buff, sizeof(buff));
-        if (buff[20] == 1) { 
+        if (buff[20] == 1) {
 			//Player 1
             pacman1->gridX = buff[0];
 			pacman1->gridY = buff[1];
@@ -676,24 +676,24 @@ void tcpTickClient(){
 			ghost3->direction = buff[17];
 			ghost3->partMove = buff[18] / 20;
 			ghost3->nextDirection = buff[19];
-        } 
-    } 
+        }
+    }
 }
 
 void tcpTickServer() {
-	int buff[100]; 
-    for (;;) { 
+	int buff[100];
+    for (;;) {
 		sleep(1/20);
-        bzero(buff, sizeof(buff)); 
-        read(connfd, buff, sizeof(buff)); 
+        bzero(buff, sizeof(buff));
+        read(connfd, buff, sizeof(buff));
 		//printf("This is buff on the server: %d, %d, %d, %d, %d, %d\n", buff[0], buff[1], buff[2], buff[3], buff[4], buff[5]);
-		if (buff[3] == 1) { 
+		if (buff[3] == 1) {
             pacman2->gridX = buff[0];
 			pacman2->gridY = buff[1];
 			pacman2->direction = buff[2];
 			pacman2->partMove = buff[3] / 20;
 			pacman2->direction = buff[4];
-			bzero(buff, sizeof(buff)); 
+			bzero(buff, sizeof(buff));
 
 			//Player1
 			buff[0] = pacman1->gridX;
@@ -717,20 +717,20 @@ void tcpTickServer() {
 			buff[14] = ghost2->nextDirection;
 
 			//Ghost3
-			buff[15] = ghost2->gridX;
-			buff[16] = ghost2->gridY;
-			buff[17] = ghost2->direction;
-			buff[18] = ghost2->partMove * 20;
-			buff[19] = ghost2->nextDirection;
+			buff[15] = ghost3->gridX;
+			buff[16] = ghost3->gridY;
+			buff[17] = ghost3->direction;
+			buff[18] = ghost3->partMove * 20;
+			buff[19] = ghost3->nextDirection;
 
 			//Confirmation
 			buff[20] = 1;
-			write(connfd, buff, sizeof(buff)); 
+			write(connfd, buff, sizeof(buff));
         } else {
 			bzero(buff, sizeof(buff));
-			write(connfd, buff, sizeof(buff)); 
+			write(connfd, buff, sizeof(buff));
 		}
-    } 
+    }
 }
 
 
@@ -746,7 +746,7 @@ void NetworkTick(){
 
 		if (n = recvfrom(sockfdUdp, mesg,1000,0,(struct sockaddr *)&servaddrUdp,&len) < 0)
 			printf("Networktick error: %d\n", mesg);
-	
+
 		if (player == 1) {
 			p2 = mesg[0] - 2;
 			//printf("player1 recived %d\n", p1);
@@ -762,7 +762,7 @@ void NetworkTick(){
 
 
 		if (p1 > -1)
-		{	
+		{
 			// if (pacman1->gridX != mesg[1] || pacman1->gridY != mesg[2]){
 			// 	pacman1->gridX = mesg[1];
 			// 	pacman1->gridY = mesg[2];
@@ -808,7 +808,7 @@ void NetworkTick(){
 				pacman2->nextDirection = p2;
 		}
 	}
-	
+
 
 }
 
@@ -817,13 +817,13 @@ int main(int argc, char **argv)
 	player = 1;
 	InitCallMeAL(8);
 	InitSpriteLight(argc, argv, 950, 680, "Dual PacMan base game for TSIN02");
-	
+
 	//Network init
 	InitNetwork(argv[1]);
 	//pthread_t tid1;
 	pthread_t tid2;
 	//pthread_create(&tid1, NULL, NetworkTick, NULL);
-	
+
 	// Install your own GLUT callbacks for keyboard and mouse
 	glutKeyboardFunc(Key);
 	glutMouseFunc(Mouse);
