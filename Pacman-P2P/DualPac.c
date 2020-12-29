@@ -115,7 +115,7 @@ char GetNeighborGridValue(int x, int y, int direction)
 }
 
 // Game data
-GridSpritePtr pacman1, pacman2;
+GridSpritePtr pacman1, pacman2, ghost1, ghost2, ghost3;
 ALuint snd, blipsnd, losesnd;
 TextureData *ghostFace[10];
 TextureData *pacmanFace[4];
@@ -167,7 +167,10 @@ void HandleGridSprite(SpritePtr sp)
 		// the same in both games! (This is a simplification from the original game
 		// where the ghosts depend on the players' movements - to make life a bit
 		// easier for you!)
-			gsp->direction = -1;//GetRandom(4);
+			if (player == 1)
+				gsp->direction = GetRandom(4);
+			else 
+				gsp->direction = -1;
 		}
 		v = GetNeighborGridValue(gsp->gridX, gsp->gridY, gsp->direction);
 		if (v == 'X') // blocked
@@ -342,7 +345,6 @@ void Init()
 
 // Ugly background - the same one that I used in the past.
 	LoadTGATextureSimple("graphics/stars.tga", &backgroundTexID); // Bakgrund
-	printf("HEJSAN INUTI VANLIGA INIT()\n");
 
 	vertical = GetFace("graphics/Vertical.tga");
 	horizontal = GetFace("graphics/Horizontal.tga");
@@ -367,9 +369,9 @@ void Init()
 	deathFace[2] = GetFace("graphics/die3.tga");
 	deathFace[3] = GetFace("graphics/die4.tga");
 
-	CreateGhost(1, 1, 4, 0);
-	CreateGhost(3, 1, 4, 1);
-	CreateGhost(1, 4, 4, 2);
+	ghost1 = CreateGhost(1, 1, 4, 0);
+	ghost2 = CreateGhost(3, 1, 4, 1);
+	ghost3 = CreateGhost(1, 4, 4, 2);
 	pacman1 = CreatePacman(8, 6, 4);
 	pacman2 = CreatePacman(8, 6, 2);
 
@@ -631,7 +633,7 @@ Datagrams upon arrival contain the address of sender which the server uses to se
 }
 
 void tcpTickClient(){
-	int buff[100]; 
+	int buff[100];
     for (;;) { 
 		sleep(1/20);
         bzero(buff, sizeof(buff));
@@ -641,17 +643,39 @@ void tcpTickClient(){
 		buff[2] = pacman2->direction;
 		buff[3] = pacman2->partMove * 20;
 		buff[4] = pacman2->nextDirection;
-		buff[5] = 1;
-		printf("This is buff on the client before sending: %d, %d, %d, %d, %d, %d\n", buff[0], buff[1], buff[2], buff[3], buff[4], buff[5]);
+
+		//printf("This is buff on the client before sending: %d, %d, %d, %d, %d, %d\n", buff[0], buff[1], buff[2], buff[3], buff[4], buff[5]);
         write(sockfdTcp, buff, sizeof(buff)); 
         bzero(buff, sizeof(buff)); 
         read(sockfdTcp, buff, sizeof(buff));
-        if (buff[5] == 1) { 
+        if (buff[20] == 1) { 
+			//Player 1
             pacman1->gridX = buff[0];
 			pacman1->gridY = buff[1];
 			pacman1->direction = buff[2];
 			pacman1->partMove = buff[3] / 20;
 			pacman1->nextDirection = buff[4];
+
+			//Ghost 1
+			ghost1->gridX = buff[5];
+			ghost1->gridY = buff[6];
+			ghost1->direction = buff[7];
+			ghost1->partMove = buff[8] / 20;
+			ghost1->nextDirection = buff[9];
+
+			//Ghost 2
+			ghost2->gridX = buff[10];
+			ghost2->gridY = buff[11];
+			ghost2->direction = buff[12];
+			ghost2->partMove = buff[13] / 20;
+			ghost2->nextDirection = buff[14];
+
+			//Ghost 3
+			ghost3->gridX = buff[15];
+			ghost3->gridY = buff[16];
+			ghost3->direction = buff[17];
+			ghost3->partMove = buff[18] / 20;
+			ghost3->nextDirection = buff[19];
         } 
     } 
 }
@@ -662,7 +686,7 @@ void tcpTickServer() {
 		sleep(1/20);
         bzero(buff, sizeof(buff)); 
         read(connfd, buff, sizeof(buff)); 
-		printf("This is buff on the server: %d, %d, %d, %d, %d, %d\n", buff[0], buff[1], buff[2], buff[3], buff[4], buff[5]);
+		//printf("This is buff on the server: %d, %d, %d, %d, %d, %d\n", buff[0], buff[1], buff[2], buff[3], buff[4], buff[5]);
 		if (buff[3] == 1) { 
             pacman2->gridX = buff[0];
 			pacman2->gridY = buff[1];
@@ -670,12 +694,37 @@ void tcpTickServer() {
 			pacman2->partMove = buff[3] / 20;
 			pacman2->direction = buff[4];
 			bzero(buff, sizeof(buff)); 
+
+			//Player1
 			buff[0] = pacman1->gridX;
 			buff[1] = pacman1->gridY;
 			buff[2] = pacman1->direction;
 			buff[3] = pacman1->partMove * 20;
 			buff[4] = pacman1->nextDirection;
-			buff[5] = 1;
+
+			//Ghost1
+			buff[5] = ghost1->gridX;
+			buff[6] = ghost1->gridY;
+			buff[7] = ghost1->direction;
+			buff[8] = ghost1->partMove * 20;
+			buff[9] = ghost1->nextDirection;
+
+			//Ghost2
+			buff[10] = ghost2->gridX;
+			buff[11] = ghost2->gridY;
+			buff[12] = ghost2->direction;
+			buff[13] = ghost2->partMove * 20;
+			buff[14] = ghost2->nextDirection;
+
+			//Ghost3
+			buff[15] = ghost2->gridX;
+			buff[16] = ghost2->gridY;
+			buff[17] = ghost2->direction;
+			buff[18] = ghost2->partMove * 20;
+			buff[19] = ghost2->nextDirection;
+
+			//Confirmation
+			buff[20] = 1;
 			write(connfd, buff, sizeof(buff)); 
         } else {
 			bzero(buff, sizeof(buff));
